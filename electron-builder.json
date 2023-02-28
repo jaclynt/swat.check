@@ -1,0 +1,42 @@
+{
+    "appId": "TAMU.SWATCheck",
+	"artifactName": "${name}-${version}.${ext}",
+	"productName": "SWATCheck",
+    "directories": {
+		"buildResources": "release/build",
+		"output": "release/dist"
+	},
+    "win": {
+        "target": "portable",
+		"icon": "release/build/icons/256x256.ico"
+    },
+    "linux":  {
+        "target": "tar.gz"
+    },
+    "files": [
+        "build/main/**/*",
+        {
+            "from": "build/renderer",
+            "to": "renderer",
+            "filter": ["**/*"]
+        },
+        {
+            "from": "src/main/static",
+            "to": "static",
+            "filter": ["**/*"]
+        },
+        "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+        "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+        "!**/node_modules/*.d.ts",
+        "!**/node_modules/.bin",
+        "!src",
+        "!config",
+        "!README.md",
+        "!scripts",
+        "!build/renderer",
+        "!dist",
+		"!release/*",
+		"!.git/*",
+		"!.vscode/*"
+    ]
+}

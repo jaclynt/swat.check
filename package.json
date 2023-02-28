@@ -1,0 +1,42 @@
+{
+	"name": "swat.check",
+	"version": "2.0.0",
+	"description": "SWAT Check reads model output from a SWAT project and performs many simple checks to identify potential model problems.",
+	"author": "Jaclyn Tech <jaclynt@tamu.edu>",
+	"private": true,
+	"main": "build/main/main.js",
+	"scripts": {
+		"dev": "node scripts/dev-server.js",
+		"build": "node scripts/build.js && electron-builder",
+		"build:win": "node scripts/build.js && electron-builder --win portable",
+		"build:mac": "node scripts/build.js && electron-builder --mac",
+		"build:linux": "node scripts/build.js && electron-builder --linux"
+	},
+	"dependencies": {
+		"@fortawesome/fontawesome-svg-core": "^6.2.1",
+		"@fortawesome/free-brands-svg-icons": "^6.2.1",
+		"@fortawesome/free-regular-svg-icons": "^6.2.1",
+		"@fortawesome/free-solid-svg-icons": "^6.2.1",
+		"@fortawesome/vue-fontawesome": "^3.0.3",
+		"axios": "^1.2.6",
+		"bootstrap": "^5.2.3",
+		"electron-args": "^0.1.0",
+		"electron-store": "^8.1.0",
+		"electron-window-state": "^5.0.3",
+		"moment": "^2.29.4",
+		"vue": "^3.2.45",
+		"vue-router": "^4.1.6"
+	},
+	"devDependencies": {
+		"@vitejs/plugin-vue": "^4.0.0",
+		"@vue/cli": "^5.0.8",
+		"chalk": "^4.1.2",
+		"chokidar": "^3.5.3",
+		"electron": "^23.1.1",
+		"electron-builder": "^23.6.0",
+		"sass": "^1.57.1",
+		"sass-loader": "^13.2.0",
+		"typescript": "^4.9.4",
+		"vite": "^4.1.4"
+	}
+}
