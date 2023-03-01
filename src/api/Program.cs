@@ -154,7 +154,7 @@ void WriteStatus(int progress, string message = null)
 {
     status.Progress = progress;
     if (!string.IsNullOrWhiteSpace(message)) status.Message = message;
-    Console.WriteLine(JsonConvert.SerializeObject(status, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() }));
+    Console.WriteLine(JsonConvert.SerializeObject(status, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver(), Formatting = Formatting.Indented }));
 }
 
 class RunStatus

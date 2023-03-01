@@ -16,3 +16,7 @@ obj/
 
 *.pubxml
 *.user
+
+api_dist/
+release/dist
+release/output
