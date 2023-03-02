@@ -1,7 +1,7 @@
 import {contextBridge, ipcRenderer} from 'electron';
 
 contextBridge.exposeInMainWorld('electronApi', {
-	runApi: (projectPath:string) => {return ipcRenderer.sendSync('run-api', projectPath) },
+	runApi: (projectPath:string, readDb:boolean) => {return ipcRenderer.sendSync('run-api', projectPath, readDb) },
 	processStdout: (callback:any) => ipcRenderer.on('process-stdout', callback),
 	processStderr: (callback:any) => ipcRenderer.on('process-stderr', callback),
 	processClose: (callback:any) => ipcRenderer.on('process-close', callback),

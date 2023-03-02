@@ -13,7 +13,7 @@ public class PointSources
 
 	public static PointSources Get(SQLiteConnection conn, SWATOutputConfig configSettings, int sub = 0)
 	{
-		int years = configSettings.SimulationYears;
+		int years = configSettings.SimulationYears - configSettings.SkipYears;
 
 		var subLines = conn.Query<HydOut>("SELECT * FROM HydOut WHERE ICode = @icode", new { icode = 1 }).AsList();
 		var psLines = conn.Query<HydOut>("SELECT * FROM HydOut WHERE ICode IN @icodes", new { icodes = new[] { 6, 7, 8, 10, 11 } }).AsList();

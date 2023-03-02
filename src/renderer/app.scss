@@ -24,7 +24,16 @@ main {
 
 #content-window {
 	height: 100vh;
+	overflow-y: hidden;
+}
+
+#inner-content-window {
 	overflow-y: auto;
+}
+
+table.table-min-width-th th, th.min, table.nowrap-headers th {
+	width: 1%;
+	white-space: nowrap;
 }
 
 // SWAT Check

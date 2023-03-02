@@ -2,7 +2,7 @@
  * Should match main/preload.ts for typescript support in renderer
  */
 export default interface ElectronApi {
-	runApi: (projectPath:string) => any,
+	runApi: (projectPath:string, readDb:boolean) => any,
 	processStdout: (callback:any) => void,
 	processStderr: (callback:any) => void,
 	processClose: (callback:any) => void,

@@ -25,8 +25,10 @@ else
     try
     {
         string projectPath = args[0];
-        if (!Directory.Exists(projectPath)) ExitWithError($"The directory \"{projectPath}\" does not exist on your computer. Please select a valid path to your project files and try again.");
-        
+        if (!Directory.Exists(projectPath)) return ExitWithError($"The directory \"{projectPath}\" does not exist on your computer. Please select a valid path to your project files and try again.");
+
+        bool skipDbRead = args.Length > 1 ? args[1] == "1" : false;
+
         List<string> requiredFiles = new()
         {
             OutputFileNames.FileCio,
@@ -43,12 +45,12 @@ else
             if (!File.Exists(Path.Combine(projectPath, file))) missing.Add(file);
         }
 
-        if (missing.Any()) ExitWithError($"The directory \"{projectPath}\" does contain the required SWAT files to run SWAT Check. The following files are missing: {string.Join(", ", missing)}. Please verify the directory location is correct and that you have SUCCESSFULLY run the model and try again.");
+        if (missing.Any()) return ExitWithError($"The directory \"{projectPath}\" does contain the required SWAT files to run SWAT Check. The following files are missing: {string.Join(", ", missing)}. Please verify the directory location is correct and that you have SUCCESSFULLY run the model and try again.");
 
-        WriteStatus(5, "Creating output database, SWATOuput.sqlite");
-        string outputDbFile = Path.Combine(projectPath, "SWATOuput.sqlite");
+        WriteStatus(5, "Creating output database, SWATOutput.sqlite");
+        string outputDbFile = Path.Combine(projectPath, "SWATOutput.sqlite");
         var outputContext = new SWATOutputDbContext(outputDbFile);
-        outputContext.CreateDatabase();
+        if (!skipDbRead) outputContext.CreateDatabase();
 
         bool abort = false;
         SWATOutputConfig outputConfig = new()
@@ -75,20 +77,23 @@ else
         outputConfig.NumSubbasins = fig.ReadNumSubs();
         outputConfig.NumReservoirs= fig.ReadNumReservoirs();
 
-        WriteStatus(10, "Reading output.std");
-        new ReadOutputStd(outputConfig).ReadFile(abort);
+        if (!skipDbRead)
+        {
+            WriteStatus(10, "Reading output.std");
+            new ReadOutputStd(outputConfig).ReadFile(abort);
 
-        WriteStatus(25, "Reading output.rch");
-        new ReadOutputRch(outputConfig).ReadFile(abort);
+            WriteStatus(25, "Reading output.rch");
+            new ReadOutputRch(outputConfig).ReadFile(abort);
 
-        WriteStatus(50, "Reading output.sub");
-        new ReadOutputSub(outputConfig).ReadFile(abort);
+            WriteStatus(50, "Reading output.sub");
+            new ReadOutputSub(outputConfig).ReadFile(abort);
 
-        WriteStatus(70, "Reading output.rsv");
-        new ReadOutputRsv(outputConfig).ReadFile(abort);
+            WriteStatus(70, "Reading output.rsv");
+            new ReadOutputRsv(outputConfig).ReadFile(abort);
 
-        WriteStatus(80, "Reading hyd.out");
-        new ReadHydOut(outputConfig).ReadFile(abort);
+            WriteStatus(80, "Reading hyd.out");
+            new ReadHydOut(outputConfig).ReadFile(abort);
+        }
 
         WriteStatus(85, "Loading data for SWAT Check");
         using var conn = outputContext.GetConnection();
@@ -141,7 +146,7 @@ int ExitWithError(string message, string exception = null)
     status.Progress = 100;
 
     Console.Error.WriteLine(JsonConvert.SerializeObject(status, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() }));
-    return (int)ExitCode.Error;
+    return (int)ExitCode.Success;
 }
 
 int ExitSuccessfully()
@@ -154,7 +159,7 @@ void WriteStatus(int progress, string message = null)
 {
     status.Progress = progress;
     if (!string.IsNullOrWhiteSpace(message)) status.Message = message;
-    Console.WriteLine(JsonConvert.SerializeObject(status, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver(), Formatting = Formatting.Indented }));
+    Console.WriteLine(JsonConvert.SerializeObject(status, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() }));
 }
 
 class RunStatus

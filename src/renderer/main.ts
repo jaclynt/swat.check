@@ -10,6 +10,7 @@ import { FontAwesomeIcon, FontAwesomeLayers, FontAwesomeLayersText } from '@fort
 
 //Custom Components
 import OpenInBrowser from './components/OpenInBrowser.vue';
+import BootstrapModal from './components/BootstrapModal.vue';
 
 const app = createApp(App);
 
@@ -21,5 +22,6 @@ app.component('font-awesome-layers-text', FontAwesomeLayersText);
 
 //Custom Components
 app.component('open-in-browser', OpenInBrowser);
+app.component('b-modal', BootstrapModal);
 
 app.mount('#app');

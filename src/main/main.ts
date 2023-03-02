@@ -109,27 +109,22 @@ app.on('before-quit', () => {
 	}
 });
 
-ipcMain.on('run-api', (event, projectPath:string) => {
+ipcMain.on('run-api', (event, projectPath:string, readDb:boolean) => {
 	let apiPath = getApiPath();
+	let skipDbRead = readDb ? '0' : '1';
 	
-	let ipcProcess = child_process.spawn(apiPath, [projectPath]);
+	let ipcProcess = child_process.spawn(apiPath, [projectPath, skipDbRead]);
 	pids.push(ipcProcess.pid);
 	let stderrChunks = [];
 	
 	ipcProcess.stdout.on('data', (data) => {
+		if (DEV_MODE) console.log(`stdout: ${data}`);
 		mainWindow.webContents.send('process-stdout', data.toString());
 	});
 
 	ipcProcess.stderr.on('data', (data) => {
-		console.log(`stderr: ${data}`);
-		stderrChunks = stderrChunks.concat(data);
-	});
-
-	ipcProcess.stderr.on('end', () => {
-		let stderrContent = Buffer.concat(stderrChunks).toString();
-		if (!(stderrContent === undefined || stderrContent === null || stderrContent.trim() === '')) {
-			mainWindow.webContents.send('process-stderr', stderrContent);
-		}
+		if (DEV_MODE) console.log(`stderr: ${data}`);
+		mainWindow.webContents.send('process-stderr', data.toString());
 	});
 	
 	ipcProcess.on('close', (code) => {
