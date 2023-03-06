@@ -1,18 +1,26 @@
 {
     "appId": "TAMU.SWATCheck",
-	"artifactName": "${name}-${version}.${ext}",
-	"productName": "SWATCheck",
+	"artifactName": "${name}-installer-${version}.${ext}",
+	"productName": "SWAT_Check",
     "directories": {
 		"buildResources": "release/build",
 		"output": "release/dist"
 	},
     "win": {
-        "target": "portable",
-		"icon": "release/build/icons/256x256.ico"
+        "target": "nsis",
+		"icon": "release/build/icons/256x256.ico",
+		"asar": true,
+		"asarUnpack": [
+			"src/main/static"
+		]
     },
-    "linux":  {
-        "target": "tar.gz"
-    },
+	"nsis": {
+		"oneClick": true,
+		"allowToChangeInstallationDirectory": false,
+		"include": "release/installer.nsh",
+		"runAfterFinish": false,
+		"shortcutName": "SWAT Check"
+	},
     "files": [
         "build/main/**/*",
         {

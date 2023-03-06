@@ -420,7 +420,7 @@
 								<b-modal title="Fraction of streamflow derived from baseflow" ref="hydBaseflowModal">
 									<template #body>
 										<div>
-											<img class="img-fluid" src="swat-check/Baseflow_Map.png" alt="Baseflow_Map.png" />
+											<img class="img-fluid" src="/swat-check/Baseflow_Map.png" alt="Baseflow_Map.png" />
 										</div>
 									</template>
 								</b-modal>
@@ -730,10 +730,10 @@
 							From Harmel, D., et al.  2006 Compilation of Measured Nutrient Load Data for Agricultural Land Uses in the United States. <em>Journal of the American Water Resources Association</em> 42(5):1163-1178.
 						</p>
 						<p>
-							<img class="img-fluid" src="swat-check/nut_croptype2.png" alt="nut_croptype2.png" />
+							<img class="img-fluid" src="/swat-check/nut_croptype2.png" alt="nut_croptype2.png" />
 						</p>
 						<p>
-							<img class="img-fluid" src="swat-check/nut_croptype3.png" alt="nut_croptype3.png" />
+							<img class="img-fluid" src="/swat-check/nut_croptype3.png" alt="nut_croptype3.png" />
 						</p>
 					</div>
 
@@ -1132,7 +1132,7 @@
 							</div>
 							<div class="col-lg">
 								<p>
-									<img class="img-fluid" src="swat-check/res.jpg" alt="res image" />
+									<img class="img-fluid" src="/swat-check/res.jpg" alt="res image" />
 								</p>
 							</div>
 						</div>
