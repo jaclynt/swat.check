@@ -1,4 +1,5 @@
 using SWAT.Check.Models;
+using System.Data.SQLite;
 
 namespace SWAT.Check.Views;
 
@@ -21,7 +22,32 @@ public class NitrogenCycle
 	public double ActiveToStableOrgN { get; set; }
 	public double ResidueMineralization { get; set; }
 
-	public static NitrogenCycle Get(OutputStd outputStd)
+	public List<dynamic> AvgAnnualByLandUse { get; set; }
+	public Dictionary<string, string> AvgAnnualDefinitions { get; set; }
+
+    private static List<string> OutputHruFields = new() { "N_APP", "NAUTO", "NGRZ", "NCFRT", "NRAIN", "NFIX", "F_MN", "A_MN", "A_SN", "DNIT", "NUP", "ORGN", "NSURQ", "NLATQ", "NO3L", "NO3GW" };
+	private static Dictionary<string, string> OutHruDefinitions = new()
+	{
+        { "LULC", "Cover/plant character code" },
+        { "N_APP", "Nitrogen fertilizer applied (kg N/ha)" },
+        { "NAUTO", "Nitrogen fertilizer auto-applied (kg N/ha)" },
+		{ "NGRZ", "Nitrogen applied during grazing operation (kg N/ha)" },
+		{ "NCFRT", "Nitrogen applied during continuous fertilizer operation (kg N/ha)" },
+		{ "NRAIN", "Nitrate added to soil profile by rain (kg N/ha)" },
+		{ "NFIX", "Nitrogen fixation (kg N/ha)" },
+		{ "F_MN", "Fresh organic to mineral N (kg N/ha)" },
+		{ "A_MN", "Active organic to mineral N (kg N/ha)" },
+		{ "A_SN", "Active organic to stable organic N (kg N/ha)" },
+		{ "DNIT", "Denitrification (kg N/ha)" },
+		{ "NUP", "Plant uptake of nitrogen (kg N/ha)" },
+		{ "ORGN", "Organic N yield (kg N/ha)" },
+		{ "NSURQ", "NO3 in surface runoff (kg N/ha)" }, 
+		{ "NLATQ", "NO3 in lateral flow (kg N/ha)" },
+        { "NO3L", "NO3 leached from the soil profile (kg N/ha)" },
+        { "NO3GW", "NO3 transported into main channel in the groundwater loading from the HRU (kg N/ha)" }
+	};
+
+	public static NitrogenCycle Get(OutputStd outputStd, SQLiteConnection conn, SWATOutputConfig configSettings)
 	{
 		NitrogenCycle nitrogenCycle = new NitrogenCycle
 		{
@@ -39,8 +65,9 @@ public class NitrogenCycle
 			TotalFertilizerN = outputStd.NFertApplied,
 			OrgNFertilizer = outputStd.OrgNInFert,
 			ActiveToStableOrgN = outputStd.ActiveToStableOrgN,
-			ResidueMineralization = outputStd.MinFromFreshOrgN
-		};
+			ResidueMineralization = outputStd.MinFromFreshOrgN,
+            AvgAnnualDefinitions = OutHruDefinitions
+        };
 
 		//Create warning messages
 		List<string> warnings = new List<string>();
@@ -98,6 +125,8 @@ public class NitrogenCycle
 
 		nitrogenCycle.Warnings = warnings;
 
-		return nitrogenCycle;
+		nitrogenCycle.AvgAnnualByLandUse = conn.GetOutputHruAvgAnnual(OutputHruFields, configSettings.PrintCode);
+
+        return nitrogenCycle;
 	}
 }

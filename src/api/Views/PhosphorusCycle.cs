@@ -1,4 +1,5 @@
 using SWAT.Check.Models;
+using System.Data.SQLite;
 
 namespace SWAT.Check.Views;
 
@@ -18,7 +19,29 @@ public class PhosphorusCycle
 	public double ActiveSolution { get; set; }
 	public double StableActive { get; set; }
 
-	public static PhosphorusCycle Get(OutputStd outputStd)
+    public List<dynamic> AvgAnnualByLandUse { get; set; }
+    public Dictionary<string, string> AvgAnnualDefinitions { get; set; }
+
+    private static List<string> OutputHruFields = new() { "P_APP", "PAUTO", "PGRZ", "PCFRT", "F_MP", "AO_LP", "L_AP", "A_SP", "PUP", "ORGP", "SEDP", "SOLP", "P_GW" };
+    private static Dictionary<string, string> OutHruDefinitions = new()
+    {
+        { "LULC", "Cover/plant character code" },
+        { "P_APP", "Phosphorus fertilizer applied (kg P/ha)" },
+		{ "PAUTO", "Phosphorus fertilizer auto-applied (kg P/ha)" },
+        { "PGRZ", "Phosphorus applied during grazing operation (kg P/ha)" },
+        { "PCFRT", "Phosphorus applied during continuous fertilizer operation (kg P/ha)" },
+        { "F_MP", "Fresh organic to mineral P (kg P/ha)" },
+        { "AO_LP", "Organic to labile mineral P (kg P/ha)" },
+        { "L_AP", "Labile to active mineral P (kg P/ha)" },
+        { "A_SP", "Active to stable P (kg P/ha)" },
+        { "PUP", "Plant uptake of phosphorus (kg P/ha)" },
+        { "ORGP", "Organic P yield (kg P/ha)" },
+        { "SEDP", "Sediment P yield (kg P/ha)" },
+        { "SOLP", "Soluble P yield (kg P/ha)" },
+        { "P_GW", "Soluble phosphorus transported by groundwater flow into main channel during the time step (kg P/ha)" }
+    };
+
+    public static PhosphorusCycle Get(OutputStd outputStd, SQLiteConnection conn, SWATOutputConfig configSettings)
 	{
 		PhosphorusCycle phosphorusCycle = new PhosphorusCycle
 		{
@@ -33,8 +56,9 @@ public class PhosphorusCycle
 			ActiveSolution = outputStd.ActiveToSolutionPFlow,
 			Mineralization = outputStd.HumusMinOrgP,
 			OrgPFertilizer = outputStd.OrgPInFert,
-			ResidueMineralization = outputStd.MinFromFreshOrgP
-		};
+			ResidueMineralization = outputStd.MinFromFreshOrgP,
+            AvgAnnualDefinitions = OutHruDefinitions
+        };
 
 		//Create warning messages
 		List<string> warnings = new List<string>();
@@ -70,6 +94,8 @@ public class PhosphorusCycle
 
 		phosphorusCycle.Warnings = warnings;
 
-		return phosphorusCycle;
+        phosphorusCycle.AvgAnnualByLandUse = conn.GetOutputHruAvgAnnual(OutputHruFields, configSettings.PrintCode);
+
+        return phosphorusCycle;
 	}
 }

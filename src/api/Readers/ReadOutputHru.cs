@@ -63,8 +63,11 @@ public class ReadOutputHru : OutputFileReader
 							}
 
 							headingDictionary = LoadColumnNamesToHeadingsDictionary(typeof(OutputHru), headerColumns, headingsAreaColumnIndex + OutputHruSchema.ValuesColumnLength, OutputHruSchema.ValuesColumnLength);
+                            //Add some alternates in case old version still have these
+                            headingDictionary.Add("WTAB CLIm", "WTAB_CLI");
+                            headingDictionary.Add("WTAB SOLm", "WTAB_SOL");
 
-							List<string> paramNames = new List<string>();
+                            List<string> paramNames = new List<string>();
 							List<string> paramValues = new List<string>();
 							foreach (string header in headerColumns)
 							{

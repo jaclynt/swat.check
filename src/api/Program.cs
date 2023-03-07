@@ -88,14 +88,20 @@ else
             WriteStatus(50, "Reading output.sub");
             new ReadOutputSub(outputConfig).ReadFile(abort);
 
-            WriteStatus(70, "Reading output.rsv");
+            WriteStatus(65, "Reading output.rsv");
             new ReadOutputRsv(outputConfig).ReadFile(abort);
 
-            WriteStatus(80, "Reading hyd.out");
+            WriteStatus(75, "Reading hyd.out");
             new ReadHydOut(outputConfig).ReadFile(abort);
+
+            if (File.Exists(Path.Combine(projectPath, OutputFileNames.OutputHru)))
+            {
+                WriteStatus(80, "Reading output.hru");
+                new ReadOutputHru(outputConfig).ReadFile(abort);
+            }
         }
 
-        WriteStatus(85, "Loading data for SWAT Check");
+        WriteStatus(95, "Loading data for SWAT Check");
         using var conn = outputContext.GetConnection();
         conn.Open();
         conn.Execute("delete from SWATCheckStatus");
@@ -114,8 +120,8 @@ else
         SWATCheckInstance model = new();
         model.Setup = Setup.Get(outputConfig, outputStd, numHrus);
         model.Hydrology = Hydrology.Get(conn, outputConfig, outputStd);
-        model.NitrogenCycle = NitrogenCycle.Get(outputStd);
-        model.PhosphorusCycle = PhosphorusCycle.Get(outputStd);
+        model.NitrogenCycle = NitrogenCycle.Get(outputStd, conn, outputConfig);
+        model.PhosphorusCycle = PhosphorusCycle.Get(outputStd, conn, outputConfig);
         model.PlantGrowth = PlantGrowth.Get(conn, outputStd);
         model.LandscapeNutrientLosses = LandscapeNutrientLosses.Get(outputStd, model.NitrogenCycle);
         model.LandUseSummary = LandUseSummary.Get(conn);

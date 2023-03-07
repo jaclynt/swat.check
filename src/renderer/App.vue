@@ -124,6 +124,7 @@
 		if (obj.progress === 100) {
 			page.isReady = true;
 			page.hideSetup = true;
+			electron.setWindowTitle(`SWAT Check v${globals.version} - ${page.projectPath}`);
 		}
 	});
 
@@ -154,6 +155,11 @@
 			return parts.join(".");
 		}
 		return x;
+	}
+
+	function getArrayKeys(arr:object[]):string[] {
+		if (arr === null || arr.length < 1) return [];
+		return Object.keys(arr[0]);
 	}
 </script>
 
@@ -544,6 +550,40 @@
 
 							<span id="ncycle-units">All units kg/ha</span>
 						</div>
+
+						<h2 class="h4 my-3">Average Annual Values by Land Use</h2>
+
+						<p>
+							The following table is read from your output.hru file, which might not print all HRUs and 
+							variables by default. Adjust lines 69 and 70 of your file.cio to either have all 0s, which will
+							print all HRUs and variables, or select specific HRUs and columns (up to 20). Save and re-run your
+							model and SWAT Check, keeping in mind that HRU output can potentially be very large (several GB) and time-consuming.
+							See the <open-in-browser url="https://swat.tamu.edu/docs/" text="SWAT IO documentation" /> for help.
+						</p>
+
+						<div class="table-responsive" v-if="status.data.nitrogenCycle.avgAnnualByLandUse !== null && status.data.nitrogenCycle.avgAnnualByLandUse.length > 0">
+							<table class="table table-sm table-striped table-min-width-th border-top">
+								<thead>
+									<tr>
+										<th v-for="(h, hi) in getArrayKeys(status.data.nitrogenCycle.avgAnnualByLandUse)" :key="hi">
+											<abbr :title="status.data.nitrogenCycle.avgAnnualDefinitions[h]">{{ h.toUpperCase() }}</abbr>
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr v-for="(row, r) in status.data.nitrogenCycle.avgAnnualByLandUse" :key="r">
+										<td v-for="(k, ki) in getArrayKeys(status.data.nitrogenCycle.avgAnnualByLandUse)" :key="ki">
+											<span v-if="k === 'lulc'">{{ row[k] }}</span>
+											<span v-else-if="row[k] === null">N/A</span>
+											<span v-else>{{ numberFormat(row[k]) }}</span>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div v-else class="alert alert-info">
+							Data not available. Check your output.hru settings described above.
+						</div>
 					</div>
 
 					<div v-else-if="page.tab === 'phosphorusCycle'">
@@ -583,6 +623,40 @@
 							<span id="presidue">{{numberFormat(status.data.phosphorusCycle.residueMineralization, 2)}}</span>
 
 							<span id="pcycle-units">All units kg/ha</span>
+						</div>
+
+						<h2 class="h4 my-3">Average Annual Values by Land Use</h2>
+
+						<p>
+							The following table is read from your output.hru file, which might not print all HRUs and 
+							variables by default. Adjust lines 69 and 70 of your file.cio to either have all 0s, which will
+							print all HRUs and variables, or select specific HRUs and columns (up to 20). Save and re-run your
+							model and SWAT Check, keeping in mind that HRU output can potentially be very large (several GB) and time-consuming.
+							See the <open-in-browser url="https://swat.tamu.edu/docs/" text="SWAT IO documentation" /> for help.
+						</p>
+
+						<div class="table-responsive" v-if="status.data.phosphorusCycle.avgAnnualByLandUse !== null && status.data.phosphorusCycle.avgAnnualByLandUse.length > 0">
+							<table class="table table-sm table-striped table-min-width-th border-top">
+								<thead>
+									<tr>
+										<th v-for="(h, hi) in getArrayKeys(status.data.phosphorusCycle.avgAnnualByLandUse)" :key="hi">
+											<abbr :title="status.data.phosphorusCycle.avgAnnualDefinitions[h]">{{ h.toUpperCase() }}</abbr>
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr v-for="(row, r) in status.data.phosphorusCycle.avgAnnualByLandUse" :key="r">
+										<td v-for="(k, ki) in getArrayKeys(status.data.phosphorusCycle.avgAnnualByLandUse)" :key="ki">
+											<span v-if="k === 'lulc'">{{ row[k] }}</span>
+											<span v-else-if="row[k] === null">N/A</span>
+											<span v-else>{{ numberFormat(row[k]) }}</span>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div v-else class="alert alert-info">
+							Data not available. Check your output.hru settings described above.
 						</div>
 					</div>
 

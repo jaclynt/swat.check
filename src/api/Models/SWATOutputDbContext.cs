@@ -118,6 +118,8 @@ public class SWATOutputDbContext
                         command.ExecuteNonQuery();
                         command.CommandText = @"DROP TABLE OutputSub;";
                         command.ExecuteNonQuery();
+                        command.CommandText = @"DROP TABLE OutputHru;";
+                        command.ExecuteNonQuery();
 
                         transaction.Commit();
                     }
@@ -172,6 +174,41 @@ public static class SWATOutputDbHelpers
         sb.AppendLine("PRIMARY KEY(ID));");
 
         return sb.ToString();
+    }
+
+    public static List<dynamic> GetOutputHruAvgAnnual(this SQLiteConnection conn, List<string> fields, SWATPrintSetting printCode)
+    {
+        string sql = "";
+
+        if (printCode == SWATPrintSetting.Daily)
+        {
+            List<string> selectParams = new();
+            List<string> joinParams = new();
+            foreach (var field in fields)
+            {
+                selectParams.Add($"AVG(t1.{field}1) as {field}");
+                joinParams.Add($"SUM({field}) as {field}1");
+            }
+
+            string selects = string.Join(", ", selectParams);
+            string joins = string.Join(", ", joinParams);
+
+            sql = $"SELECT t1.LULC, {selects} FROM ( SELECT LULC, {joins} FROM OutputHru GROUP BY LULC, Year ) as t1";
+        }
+        else
+        {
+            List<string> selectParams = new();
+            foreach (var field in fields)
+            {
+                selectParams.Add($"AVG({field}) as {field}");
+            }
+
+            string selects = string.Join(", ", selectParams);
+
+            sql = $"SELECT LULC, {selects} FROM OutputHru WHERE YearSpan > 0 GROUP BY LULC";
+        }
+
+        return conn.Query(sql).AsList();
     }
 
     public static List<double> GetAvg(this SQLiteConnection conn, string tableName, string groupFieldName, string avgFieldName, string where)
