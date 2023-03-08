@@ -22,6 +22,19 @@ public static class Formatters
         return number;
     }
 
+    public static int ParseInt(this string value)
+    {
+        if (value.Equals("NaN"))
+        {
+            return 0;
+        }
+
+        int number;
+        int.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out number);
+
+        return number;
+    }
+
     public static string Find(this string[] lines, string value)
     {
         return lines.Where(l => l.Contains(value)).SingleOrDefault();

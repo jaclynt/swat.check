@@ -132,9 +132,16 @@ else
 
         conn.Close();
 
+        string swatCheckFile = Path.Combine(projectPath, "SWATCheck.json");
+        using (StreamWriter outfile = new StreamWriter(swatCheckFile))
+        {
+            await outfile.FlushAsync();
+            await outfile.WriteAsync(JsonConvert.SerializeObject(model, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() }));
+        }
+
         timer.Stop();
         status.RunTime = timer.Elapsed.TimeSpanToString();
-        status.Data = model;
+        //status.Data = model;
         return ExitSuccessfully();
     }
     catch (Exception ex)

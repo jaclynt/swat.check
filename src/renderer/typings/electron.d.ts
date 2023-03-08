@@ -12,7 +12,8 @@ export default interface ElectronApi {
 	openFileOnSystem: (key:string) => void,
 	openUrl: (key:string) => void,
 	openFileDialog: (options:any) => string[],
-	setWindowTitle: (message: string) => void
+	setWindowTitle: (message: string) => void,
+	readSwatCheck: (projectPath:string) => any
 }
 
 declare global {

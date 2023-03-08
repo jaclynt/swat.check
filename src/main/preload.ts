@@ -11,5 +11,6 @@ contextBridge.exposeInMainWorld('electronApi', {
 	openFileOnSystem: (key:string) => ipcRenderer.send('open-file-on-system', key),
 	openUrl: (key:string) => ipcRenderer.send('open-url', key),
 	openFileDialog: (options:any) => { return ipcRenderer.sendSync('open-file-dialog', options) },
-	setWindowTitle: (message:string) => ipcRenderer.send('set-window-title', message)
+	setWindowTitle: (message:string) => ipcRenderer.send('set-window-title', message),
+	readSwatCheck: (projectPath:string) => {return ipcRenderer.sendSync('read-swatcheck', projectPath) }
 })

@@ -1,6 +1,7 @@
 import {app, BrowserWindow, ipcMain, session, Menu, dialog, shell} from 'electron';
 import child_process from 'child_process';
 import {join} from 'path';
+import fs from 'fs';
 
 import windowStateKeeper from 'electron-window-state';
 import parseArgs from 'electron-args';
@@ -170,6 +171,12 @@ ipcMain.on('open-file-dialog', (event, options) => {
 
 ipcMain.on('set-window-title', (event, message:string) => {
 	mainWindow.setTitle(message);
+})
+
+ipcMain.on('read-swatcheck', (event, projectPath:string) => {
+	const data = fs.readFileSync(join(projectPath, 'SWATCheck.json'), 'utf8');
+	//console.log(data);
+	event.returnValue = data;
 })
 
 //Set Menu

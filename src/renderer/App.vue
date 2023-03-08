@@ -118,10 +118,11 @@
 		status.message = obj.message;
 		status.progress = obj.progress;
 		status.exception = obj.exception;
-		status.data = obj.data;
+		//status.data = obj.data;
 		status.runTime = obj.runTime;
 
 		if (obj.progress === 100) {
+			status.data = JSON.parse(electron.readSwatCheck(page.projectPath));
 			page.isReady = true;
 			page.hideSetup = true;
 			electron.setWindowTitle(`SWAT Check v${globals.version} - ${page.projectPath}`);

@@ -29,16 +29,23 @@ public class ReadOutputRch : OutputFileReader
 					//New for rev.670. They added a space and shifted everything over. Try and detect that.
 					int adjustSpace = 0;
 					int testRch;
-					try
-					{
-						testRch = OutputRchSchema.RCH.GetInt(lines.ToArray()[9]);
-					}
-					catch (FormatException)
-					{
-						adjustSpace = 1;
-					}
+					bool noSuccess = true;
+                    while (noSuccess)
+                    {
+                        try
+                        {
+                            SchemaLine testSchema = new SchemaLine { StartIndex = 5 + adjustSpace, Length = 5 };
+                            testRch = testSchema.GetInt(lines.ToArray()[9]);
+                            noSuccess = false;
+                        }
+                        catch (FormatException)
+                        {
+                            adjustSpace++;
+                            if (adjustSpace > 15) noSuccess = false;
+                        }
+                    }
 
-					OutputRchSchemaInstance outputRchSchema = new OutputRchSchemaInstance(adjustSpace);
+                    OutputRchSchemaInstance outputRchSchema = new OutputRchSchemaInstance(adjustSpace);
 
 					List<string> headerColumns = new List<string>();
 					int i = 1;

@@ -46,6 +46,7 @@ public class OutputHruSchemaInstance
     public int AreaHeaderIndexWithCalendarDate { get; set; }
     public int AreaValueIndexWithCalendarDate { get; set; }
     public int ValuesColumnLength { get; set; }
+    public int AreaColumnLength { get; set; }
 
     public SchemaLine LULC { get; set; }
     public SchemaLine HRU { get; set; }
@@ -58,23 +59,26 @@ public class OutputHruSchemaInstance
     public SchemaLine DA { get; set; }
     public SchemaLine YR { get; set; }
 
-    public OutputHruSchemaInstance(int adjustSpace = 0)
+    public OutputHruSchemaInstance(int adjustSpace = 0, int adjustLength = 0)
     {
         HeaderLineNumber = 9;
         AreaHeaderIndex = 34 + adjustSpace;
         AreaHeaderIndexWithCalendarDate = 40 + adjustSpace;
         AreaValueIndexWithCalendarDate = 41 + adjustSpace;
         ValuesColumnLength = 10;
+        AreaColumnLength = 10;
+
+        if (adjustLength > 0) ValuesColumnLength = 11;
 
         LULC = new SchemaLine { StartIndex = 0 + adjustSpace, Length = 4 };
-        HRU = new SchemaLine { StartIndex = 4 + adjustSpace, Length = 5 };
-        GIS = new SchemaLine { StartIndex = 9 + adjustSpace, Length = 10 };
-        SUB = new SchemaLine { StartIndex = 19 + adjustSpace, Length = 5 };
-        MGT = new SchemaLine { StartIndex = 24 + adjustSpace, Length = 5 };
-        MON = new SchemaLine { StartIndex = 29 + adjustSpace, Length = 5 };
+        HRU = new SchemaLine { StartIndex = 4 + adjustSpace, Length = 5 + adjustLength };
+        GIS = new SchemaLine { StartIndex = 9 + adjustSpace + adjustLength, Length = 10 };
+        SUB = new SchemaLine { StartIndex = 19 + adjustSpace + adjustLength, Length = 5 + adjustLength };
+        MGT = new SchemaLine { StartIndex = 24 + adjustSpace + adjustLength + adjustLength, Length = 5 };
+        MON = new SchemaLine { StartIndex = 29 + adjustSpace + adjustLength + adjustLength, Length = 5 };
 
-        MO = new SchemaLine { StartIndex = 29 + adjustSpace, Length = 3 };
-        DA = new SchemaLine { StartIndex = 32 + adjustSpace, Length = 3 };
-        YR = new SchemaLine { StartIndex = 35 + adjustSpace, Length = 5 };
+        MO = new SchemaLine { StartIndex = 29 + adjustSpace + adjustLength + adjustLength, Length = 3 };
+        DA = new SchemaLine { StartIndex = 32 + adjustSpace + adjustLength + adjustLength, Length = 3 };
+        YR = new SchemaLine { StartIndex = 35 + adjustSpace + adjustLength + adjustLength, Length = 5 };
     }
 }

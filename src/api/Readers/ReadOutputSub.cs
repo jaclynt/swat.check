@@ -29,13 +29,20 @@ public class ReadOutputSub : OutputFileReader
 					//New for rev.670. They added a space and shifted everything over. Try and detect that.
 					int adjustSpace = 0;
 					int testSub;
-					try
+					bool noSuccess = true;
+					while (noSuccess)
 					{
-						testSub = OutputSubSchema.SUB.GetInt(lines.ToArray()[9]);
-					}
-					catch (FormatException)
-					{
-						adjustSpace = 1;
+						try
+						{
+							SchemaLine testSchema = new SchemaLine { StartIndex = 6 + adjustSpace, Length = 4 };
+							testSub = testSchema.GetInt(lines.ToArray()[9]);
+							noSuccess = false;
+						}
+						catch (FormatException)
+						{
+							adjustSpace++;
+							if (adjustSpace > 15) noSuccess = false;
+						}
 					}
 
 					OutputSubSchemaInstance outputSubSchema = new OutputSubSchemaInstance(adjustSpace);

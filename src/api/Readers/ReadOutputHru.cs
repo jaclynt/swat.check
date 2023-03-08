@@ -26,19 +26,26 @@ public class ReadOutputHru : OutputFileReader
 				{
 					IEnumerable<string> lines = File.ReadLines(_filePath);
 
-					//New for rev.670. They added a space and shifted everything over. Try and detect that.
-					int adjustSpace = 0;
+					//For HRU, I don't think space got adjusted but length did.
+					int adjustLength = 0;
 					int testSub;
-					try
-					{
-						testSub = OutputHruSchema.HRU.GetInt(lines.ToArray()[9]);
-					}
-					catch (FormatException)
-					{
-						adjustSpace = 1;
-					}
+					bool noSuccess = true;
+                    while (noSuccess)
+                    {
+                        try
+                        {
+                            SchemaLine testSchema = new SchemaLine { StartIndex = 4, Length = 5 + adjustLength };
+                            testSub = testSchema.GetInt(lines.ToArray()[9]);
+                            noSuccess = false;
+                        }
+                        catch (FormatException)
+                        {
+                            adjustLength++;
+                            if (adjustLength > 15) noSuccess = false;
+                        }
+                    }
 
-					OutputHruSchemaInstance outputHruSchema = new OutputHruSchemaInstance(adjustSpace);
+                    OutputHruSchemaInstance outputHruSchema = new OutputHruSchemaInstance(0, adjustLength);
 
 					List<string> headerColumns = new List<string>();
 					int i = 1;
@@ -55,14 +62,14 @@ public class ReadOutputHru : OutputFileReader
 					{
 						if (i == OutputHruSchema.HeaderLineNumber)
 						{
-							int columnIndex = headingsAreaColumnIndex + OutputHruSchema.ValuesColumnLength; //Area is the last required column, so start reading variable headings after this.
+							int columnIndex = headingsAreaColumnIndex + outputHruSchema.AreaColumnLength; //Area is the last required column, so start reading variable headings after this.
 							while (columnIndex < line.Length)
 							{
-								headerColumns.Add(line.Substring(columnIndex, OutputHruSchema.ValuesColumnLength).Trim());
-								columnIndex += OutputHruSchema.ValuesColumnLength;
+								headerColumns.Add(line.Substring(columnIndex, outputHruSchema.ValuesColumnLength).Trim());
+								columnIndex += outputHruSchema.ValuesColumnLength;
 							}
 
-							headingDictionary = LoadColumnNamesToHeadingsDictionary(typeof(OutputHru), headerColumns, headingsAreaColumnIndex + OutputHruSchema.ValuesColumnLength, OutputHruSchema.ValuesColumnLength);
+							headingDictionary = LoadColumnNamesToHeadingsDictionary(typeof(OutputHru), headerColumns, headingsAreaColumnIndex + outputHruSchema.ValuesColumnLength, OutputHruSchema.ValuesColumnLength);
                             //Add some alternates in case old version still have these
                             headingDictionary.Add("WTAB CLIm", "WTAB_CLI");
                             headingDictionary.Add("WTAB SOLm", "WTAB_SOL");
@@ -169,8 +176,8 @@ public class ReadOutputHru : OutputFileReader
 								columnIndex++;
 							}
 
-							cmd.Parameters.AddWithValue("@Area", line.ParseDouble(columnIndex, columnLength));
-							columnIndex += columnLength;
+							cmd.Parameters.AddWithValue("@Area", line.ParseDouble(columnIndex, outputHruSchema.AreaColumnLength));
+							columnIndex += outputHruSchema.AreaColumnLength;
 
 							foreach (string heading in headerColumns)
 							{

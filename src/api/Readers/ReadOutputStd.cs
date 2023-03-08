@@ -100,8 +100,47 @@ public class ReadOutputStd : OutputFileReader
 									}
 									catch (Exception)
 									{
-										throw new Exception("Error reading output.std average annual values at line " + i);
-									}
+										//Schema is different, try space delimitted
+                                        try
+                                        {
+                                            var values = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                            int hru = values[0].ParseInt();
+
+                                            cmd.Parameters.Clear();
+                                            cmd.Parameters.AddWithValue("@HRU", hru);
+                                            cmd.Parameters.AddWithValue("@Sub", values[1].ParseInt());
+                                            cmd.Parameters.AddWithValue("@Soil", values[2].Trim());
+                                            cmd.Parameters.AddWithValue("@Area", values[3].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@CN", values[4].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@AWC", values[5].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@USLE_LS", values[6].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@IRR", values[7].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@AUTON", values[8].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@AUTOP", values[9].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@MIXEF", values[10].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@PREC", values[11].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@SURQ", values[12].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@GWQ", values[13].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@ET", values[14].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@SED", values[15].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@NO3", values[16].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@ORGN", values[17].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@BIOM", values[18].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@YLD", values[19].ParseDouble());
+
+                                            string landuse = string.Empty;
+                                            if (landuses.ContainsKey(hru))
+                                                landuse = landuses[hru];
+
+                                            cmd.Parameters.AddWithValue("@LandUse", landuse);
+
+                                            cmd.ExecuteNonQuery();
+                                        }
+                                        catch (Exception)
+                                        {
+                                            throw new Exception("Error reading output.std average annual values at line " + i);
+                                        }
+                                    }
 								}
 							}
 							else if (currentlyReadingMonthlyValues)
@@ -133,8 +172,27 @@ public class ReadOutputStd : OutputFileReader
 									}
 									catch (Exception)
 									{
-										throw new Exception("Error reading output.std average monthly basin values at line " + i);
-									}
+                                        //Schema is different, try space delimitted
+                                        try
+                                        {
+                                            var values = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                            cmd.Parameters.Clear();
+                                            cmd.Parameters.AddWithValue("@Mon", values[0].ParseInt());
+                                            cmd.Parameters.AddWithValue("@Rain", values[1].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@SnowFall", values[2].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@SurfQ", values[3].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@LatQ", values[4].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@WaterYield", values[5].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@ET", values[6].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@SedYield", values[7].ParseDouble());
+                                            cmd.Parameters.AddWithValue("@PET", values[8].ParseDouble());
+                                            cmd.ExecuteNonQuery();
+                                        }
+                                        catch (Exception)
+                                        {
+                                            throw new Exception("Error reading output.std average monthly basin values at line " + i);
+                                        }
+                                    }
 								}
 							}
 							else if (currentlyReadingPlantValues)

@@ -16,16 +16,23 @@ public class LandUseSummary
 		List<string> warnings = new List<string>();
 		List<string> hruWarnings = new List<string>();
 
+		int hruWarningLimit = 50;
 		foreach (var row in conn.Query<OutputStdAvgAnnual>("SELECT * FROM OutputStdAvgAnnual WHERE CN > 98"))
 		{
-			hruWarnings.Add(string.Format("HRU# {0} Subbasin# {1} Crop {2} Soil {3}: curve number may be too high (>98)",
-				row.HRU, row.Sub, row.LandUse, row.Soil));
+			if (hruWarnings.Count < hruWarningLimit)
+			{
+				hruWarnings.Add(string.Format("HRU# {0} Subbasin# {1} Crop {2} Soil {3}: curve number may be too high (>98)",
+					row.HRU, row.Sub, row.LandUse, row.Soil));
+			}
 		}
 
 		foreach (var row in conn.Query<OutputStdAvgAnnual>("SELECT * FROM OutputStdAvgAnnual WHERE CN < 35"))
 		{
-			hruWarnings.Add(string.Format("HRU# {0} Subbasin# {1} Crop {2} Soil {3}: curve number may be too low (<35)",
-				row.HRU, row.Sub, row.LandUse, row.Soil));
+			if (hruWarnings.Count < hruWarningLimit)
+			{
+				hruWarnings.Add(string.Format("HRU# {0} Subbasin# {1} Crop {2} Soil {3}: curve number may be too low (<35)",
+					row.HRU, row.Sub, row.LandUse, row.Soil));
+			}
 		}
 
 		var groups = conn.Query(@"SELECT LandUse, SUM(Area) AS Area,
