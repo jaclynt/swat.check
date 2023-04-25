@@ -26,26 +26,19 @@ public class ReadOutputHru : OutputFileReader
 				{
 					IEnumerable<string> lines = File.ReadLines(_filePath);
 
-					//For HRU, I don't think space got adjusted but length did.
-					int adjustLength = 0;
+					//New for rev.670. They added a space and shifted everything over. Try and detect that.
+					int adjustSpace = 0;
 					int testSub;
-					bool noSuccess = true;
-                    while (noSuccess)
-                    {
-                        try
-                        {
-                            SchemaLine testSchema = new SchemaLine { StartIndex = 4, Length = 5 + adjustLength };
-                            testSub = testSchema.GetInt(lines.ToArray()[9]);
-                            noSuccess = false;
-                        }
-                        catch (FormatException)
-                        {
-                            adjustLength++;
-                            if (adjustLength > 15) noSuccess = false;
-                        }
-                    }
+					try
+					{
+						testSub = OutputHruSchema.HRU.GetInt(lines.ToArray()[9]);
+					}
+					catch (FormatException)
+					{
+						adjustSpace = 1;
+					}
 
-                    OutputHruSchemaInstance outputHruSchema = new OutputHruSchemaInstance(0, adjustLength);
+					OutputHruSchemaInstance outputHruSchema = new OutputHruSchemaInstance(adjustSpace);
 
 					List<string> headerColumns = new List<string>();
 					int i = 1;
@@ -56,25 +49,23 @@ public class ReadOutputHru : OutputFileReader
 					int currentYear = _configSettings.SimulationStartOn.Year + _configSettings.SkipYears;
 					int numYears = _configSettings.SimulationEndOn.Year - currentYear + 1;
 
-					int numHrus = _configSettings.NumHrusPrinted;
-
+					//int numHrus = _configSettings.NumHrusPrinted;
+					bool markedYear = false;
+					bool atEndOfYear = false;
 					foreach (string line in lines)
 					{
 						if (i == OutputHruSchema.HeaderLineNumber)
 						{
-							int columnIndex = headingsAreaColumnIndex + outputHruSchema.AreaColumnLength; //Area is the last required column, so start reading variable headings after this.
+							int columnIndex = headingsAreaColumnIndex + OutputHruSchema.ValuesColumnLength; //Area is the last required column, so start reading variable headings after this.
 							while (columnIndex < line.Length)
 							{
-								headerColumns.Add(line.Substring(columnIndex, outputHruSchema.ValuesColumnLength).Trim());
-								columnIndex += outputHruSchema.ValuesColumnLength;
+								headerColumns.Add(line.Substring(columnIndex, OutputHruSchema.ValuesColumnLength).Trim());
+								columnIndex += OutputHruSchema.ValuesColumnLength;
 							}
 
-							headingDictionary = LoadColumnNamesToHeadingsDictionary(typeof(OutputHru), headerColumns, headingsAreaColumnIndex + outputHruSchema.ValuesColumnLength, OutputHruSchema.ValuesColumnLength);
-                            //Add some alternates in case old version still have these
-                            headingDictionary.Add("WTAB CLIm", "WTAB_CLI");
-                            headingDictionary.Add("WTAB SOLm", "WTAB_SOL");
+							headingDictionary = LoadColumnNamesToHeadingsDictionary(typeof(OutputHru), headerColumns, headingsAreaColumnIndex + OutputHruSchema.ValuesColumnLength, OutputHruSchema.ValuesColumnLength);
 
-                            List<string> paramNames = new List<string>();
+							List<string> paramNames = new List<string>();
 							List<string> paramValues = new List<string>();
 							foreach (string header in headerColumns)
 							{
@@ -107,15 +98,18 @@ public class ReadOutputHru : OutputFileReader
 									else
 									{
 										int julianDay = outputHruSchema.MON.GetInt(line);
+										if (atEndOfYear && julianDay == 1)
+											currentYear++;
+
 										DateTime d = new DateTime(currentYear, 1, 1).AddDays(julianDay - 1);
 										cmd.Parameters.AddWithValue("@Month", d.Month);
 										cmd.Parameters.AddWithValue("@Day", d.Day);
 										cmd.Parameters.AddWithValue("@Year", d.Year);
 
-										if (hru == numHrus && ((DateTime.IsLeapYear(currentYear) && julianDay == 366) || julianDay == 365))
-										{
-											currentYear++;
-										}
+										if ((DateTime.IsLeapYear(currentYear) && julianDay == 366) || julianDay == 365)
+											atEndOfYear = true;
+										else
+											atEndOfYear = false;
 									}
 									cmd.Parameters.AddWithValue("@YearSpan", 0);
 									break;
@@ -128,6 +122,7 @@ public class ReadOutputHru : OutputFileReader
 									{
 										if (mon < 13)
 										{
+											markedYear = false;
 											cmd.Parameters.AddWithValue("@Month", (int)mon);
 											cmd.Parameters.AddWithValue("@Year", currentYear);
 										}
@@ -135,18 +130,28 @@ public class ReadOutputHru : OutputFileReader
 										{
 											cmd.Parameters.AddWithValue("@Month", 0);
 											cmd.Parameters.AddWithValue("@Year", (int)mon);
-											if (hru == numHrus)
+											if (!markedYear)
 											{
 												currentYear++;
+												markedYear = true;
 											}
 										}
 										cmd.Parameters.AddWithValue("@YearSpan", 0);
 									}
 									else
 									{
-										cmd.Parameters.AddWithValue("@Month", 0);
-										cmd.Parameters.AddWithValue("@Year", 0);
-										cmd.Parameters.AddWithValue("@YearSpan", mon);
+										if (mon == _configSettings.SimulationEndOn.Year)
+										{
+											cmd.Parameters.AddWithValue("@Month", 0);
+											cmd.Parameters.AddWithValue("@Year", (int)mon);
+											cmd.Parameters.AddWithValue("@YearSpan", 0);
+										}
+										else
+										{
+											cmd.Parameters.AddWithValue("@Month", 0);
+											cmd.Parameters.AddWithValue("@Year", 0);
+											cmd.Parameters.AddWithValue("@YearSpan", mon);
+										}
 									}
 									break;
 								case SWATPrintSetting.Yearly:
@@ -176,8 +181,8 @@ public class ReadOutputHru : OutputFileReader
 								columnIndex++;
 							}
 
-							cmd.Parameters.AddWithValue("@Area", line.ParseDouble(columnIndex, outputHruSchema.AreaColumnLength));
-							columnIndex += outputHruSchema.AreaColumnLength;
+							cmd.Parameters.AddWithValue("@Area", line.ParseDouble(columnIndex, columnLength));
+							columnIndex += columnLength;
 
 							foreach (string heading in headerColumns)
 							{
