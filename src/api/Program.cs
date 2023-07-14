@@ -8,7 +8,7 @@ using SWAT.Check.Readers;
 using SWAT.Check.Views;
 using System.Diagnostics;
 
-string SWAT_CHECK_VERSION = "2.0";
+string SWAT_CHECK_VERSION = "2.0.1";
 
 Stopwatch timer = new();
 timer.Start();

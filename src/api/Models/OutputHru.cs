@@ -138,9 +138,9 @@ public class OutputHruBase
 	public double? BACTP { get; set; }
 	[TextFileHeading("BACTLPct")]
 	public double? BACTLP { get; set; }
-	[TextFileHeading("WTAB_CLIm")]
+	[TextFileHeading("WTAB_CLIm", "WTAB CLIm")]
 	public double? WTAB_CLI { get; set; }
-	[TextFileHeading("WTAB_SOLm")]
+	[TextFileHeading("WTAB_SOLm", "WTAB SOLm")]
 	public double? WTAB_SOL { get; set; }
 	[TextFileHeading("SNOmm")]
 	public double? SNO { get; set; }
