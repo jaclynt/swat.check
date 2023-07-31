@@ -24,6 +24,7 @@ Desktop interface for SWAT Check for SWAT2012. Download at [swat.tamu.edu/softwa
 ### Build the source code ###
 
 1. From `/src/api` publish the .NET project to the `/src/main/static/api_dist` directory
+	* Set publish profile settings to target net7.0, self-contained, win-x64, produce single file
 2. From the root of the source code directory run the following:
 	* Windows: `npm run build:win`
 3. Program will be in `/release/dist`
